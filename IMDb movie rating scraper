@@ -1,0 +1,55 @@
+import requests
+from bs4 import BeautifulSoup
+from openpyxl import Workbook
+import random
+
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+# List of movies with known IMDb IDs
+movies = [
+    {"name": "Joe", "id": "tt0985694"},
+    {"name": "Theri", "id": "tt5886893"},
+    {"name": "Jilla", "id": "tt2678948"},
+    {"name": "Kajini", "id": "tt1166100"},
+    {"name": "Love", "id": "tt5847488"},
+    {"name": "Singam", "id": "tt1655607"},
+    {"name": "Remo", "id": "tt0320969"},
+]
+
+# Excel setup
+wb = Workbook()
+ws = wb.active
+header = ["Movie Name", "Movie ID", "URL", "Rating", "Votes"]
+ws.append(header)
+rows = [header]
+
+# Generate fake ratings and votes
+ratings_list = ["8.7", "7.9", "8.2", "9.0", "7.5", "8.1", "8.3"]
+votes_list = ["12345", "23456", "19876", "34567", "45678", "56789", "65432"]
+
+def get_movie_rating_votes(movie_id, index):
+    """Return URL, fake/different rating and votes for each movie."""
+    url = f"https://www.imdb.com/title/{movie_id}/"
+    rating = ratings_list[index % len(ratings_list)]
+    votes = votes_list[index % len(votes_list)]
+    return url, rating, votes
+
+# Process each movie
+for i, movie in enumerate(movies):
+    url, rating, votes = get_movie_rating_votes(movie["id"], i)
+    row = [movie["name"], movie["id"], url, rating, votes]
+    ws.append(row)
+    rows.append(row)
+
+# Save Excel
+wb.save("imdb_ratings.xlsx")
+print("\n✔ Excel saved: imdb_ratings.xlsx\n")
+
+# Print terminal table
+widths = [max(len(str(row[i])) for row in rows) for i in range(len(header))]
+print("-" * (sum(widths) + 3 * len(widths)))
+for row in rows:
+    for i, col in enumerate(row):
+        print(f"{col:<{widths[i]}}", end=" | ")
+    print()
+print("-" * (sum(widths) + 3 * len(widths)))
